@@ -60,9 +60,9 @@
 
     -dark: #1d1d1d;
 
-    -fx-base: white;
+    -fx-base: -dark;
     -fx-background: -fx-base;
-    -fx-contrast: -dark;
+    -fx-contrast: white;
 
     -fx-accent: #0063b1;
     -fx-accent-text: white;
