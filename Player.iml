@@ -10,5 +10,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="tika-core-1.14" level="project" />
     <orderEntry type="library" name="lucene-core-6.3.0" level="project" />
+    <orderEntry type="library" name="tika-parsers-1.14" level="project" />
+    <orderEntry type="library" name="lucene-queryparser-6.3.0" level="project" />
+    <orderEntry type="library" name="lucene-queries-6.3.0" level="project" />
   </component>
 </module>
