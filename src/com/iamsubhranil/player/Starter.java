@@ -8,9 +8,7 @@
 package com.iamsubhranil.player;
 
 import javafx.application.Application;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -25,10 +23,15 @@ public class Starter extends Application {
     @Override
     public void start(Stage primaryStage) {
         loadFonts();
-        VBox vBox = new VBox(new Label("Please wait.."));
-        vBox.setAlignment(Pos.CENTER);
+        VBox vBox = new VBox();
+        vBox.setFillWidth(true);
         vBox.getStylesheets().add("/styles/MyMetro.css");
-        Scene primaryScene = new Scene(vBox, 500, 500);
+
+        UITest uiTest = new UITest();
+        uiTest.getStylesheets().add("/styles/MyMetro.css");
+
+        Scene primaryScene = new Scene(uiTest, 700, 500);
+
 
         primaryStage.setScene(primaryScene);
         primaryStage.show();
