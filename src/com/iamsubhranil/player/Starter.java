@@ -10,6 +10,7 @@ package com.iamsubhranil.player;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -30,9 +31,9 @@ public class Starter extends Application {
         UITest uiTest = new UITest();
         uiTest.getStylesheets().add("/styles/MyMetro.css");
 
-        Scene primaryScene = new Scene(uiTest, 700, 500);
+        Scene primaryScene = new Scene(uiTest, 700, 500, Color.TRANSPARENT);
 
-
+        //  primaryStage.initStyle(StageStyle.TRANSPARENT);
         primaryStage.setScene(primaryScene);
         primaryStage.show();
     }

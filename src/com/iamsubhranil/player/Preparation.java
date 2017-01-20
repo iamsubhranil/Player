@@ -51,12 +51,16 @@ public class Preparation {
         load();
     }
 
+    public static IndexReader getIndex() throws IOException {
+        return DirectoryReader.open(FSDirectory.open(new File(directoryToStore).toPath()));
+    }
+
     private static void load() {
         System.out.println("Starting load..");
         try {
-            Directory index = FSDirectory.open(new File(directoryToStore).toPath());
+            Directory loadedIndex = FSDirectory.open(new File(directoryToStore).toPath());
             System.out.println("Reading index..");
-            IndexReader indexReader = DirectoryReader.open(index);
+            IndexReader indexReader = DirectoryReader.open(loadedIndex);
             int docs = indexReader.numDocs();
             if (metaSet.size() == 0) {
                 System.out.println("Populating metaset..");
@@ -99,7 +103,7 @@ public class Preparation {
                 }
             });
             indexReader.close();
-            index.close();
+            loadedIndex.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

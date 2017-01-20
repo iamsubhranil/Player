@@ -60,9 +60,9 @@
 
     -dark: #1d1d1d;
 
-    -fx-base: -dark;
+    -fx-base: white;
     -fx-background: -fx-base;
-    -fx-contrast: white;
+    -fx-contrast: -dark;
 
     -fx-accent: #0063b1;
     -fx-accent-text: white;
@@ -161,7 +161,7 @@
 }
 
 .header{
-    -fx-font-size: 46pt;
+    -fx-font-size: 32pt;
     -fx-font-family: "Open Sans Light";
     -fx-text-fill: -fx-text-base-color;
 }
@@ -198,6 +198,12 @@
     -fx-opacity: 0.6;
 }
 
+.list-cell-small{
+    -fx-font-size: 12pt;
+    -fx-font-family: "Open Sans Semibold";
+    -fx-text-fill: -fx-text-base-color;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Push Button                                                                 *
@@ -219,10 +225,15 @@
     -fx-text-fill: -fx-button-text-fill;
 }
 
-.button-noborder, .button-noborder:focused, .button-noborder:pressed, .button-noborder:default, .button-noborder:focused, .button-noborder:default:hover:pressed{
+.button-noborder, .button-noborder:pressed, .button-noborder:default, .button-noborder:focused, .button-noborder:default:pressed{
 	-fx-border-width: 0;
 	-fx-padding: 5 5 5 5;
-	-fx-font-family: "Open Sans Regular";
+	-fx-font-family: "Open Sans Light";
+	-fx-font-size: 20pt;
+}
+
+.button-noborder:hover{
+    -fx-text-fill: black;
 }
 
 .button:hover{
@@ -826,8 +837,8 @@
 }
 
 .list-cell {
-    -fx-font-family: "Open Sans Regular";
-    -fx-font-size: 15pt;
+    -fx-font-family: "Open Sans Semibold";
+    -fx-font-size: 13pt;
 }
 
 .list-cell:empty {
@@ -846,7 +857,7 @@
 }
 
 .list-cell:odd{
-    -fx-background-color: derive(-fx-base,0%);
+    -fx-background-color: derive(-fx-base,-10%);
     -fx-text-fill:  -fx-contrast;
 }
 
@@ -861,8 +872,8 @@
 }
 
 .list-cell:hover{
-    -fx-background-color: -hover-color;
-    -fx-text-fill: -hover-text-fill;
+    -fx-background-color: derive(-fx-accent,30%);
+    -fx-text-fill: -fx-accent-text;
     -fx-fill: #ffffff;
 }
 
@@ -870,6 +881,12 @@
     -fx-background-color: derive(-fx-accent,-40%);  /* TODO: this probably is the "accent" color" */
     -fx-text-fill: -fx-accent-text;
     -fx-fill: #ffffff;
+}
+
+.list-cell:pressed{
+    -fx-background-color: -fx-accent;  /* TODO: this probably is the "accent" color" */
+        -fx-text-fill: -fx-accent-text;
+        -fx-fill: #ffffff;
 }
 
 /*******************************************************************************
