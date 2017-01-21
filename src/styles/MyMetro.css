@@ -159,7 +159,7 @@
 }
 
 .label{
-    -fx-font-size: 15pt;
+    -fx-font-size: 13pt;
     -fx-font-family: "Bariol Regular";
     -fx-text-fill: -fx-text-base-color;
 }
@@ -239,8 +239,8 @@
 .button-noborder, .button-noborder:pressed, .button-noborder:default, .button-noborder:focused, .button-noborder:default:pressed{
 	-fx-border-width: 0;
 	-fx-padding: 5 5 5 5;
-	-fx-font-family: "Bariol Regular";
-	-fx-font-size: 15pt;
+	-fx-font-family: "Bariol Bold";
+	-fx-font-size: 12pt;
 }
 
 .button-noborder:hover{
@@ -592,11 +592,11 @@
  * ScrollBar                                                                   *
  *                                                                             *
  ******************************************************************************/
-
+/*
 .scroll-bar > .thumb{
-    -fx-background-color: #b8b8b8;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
+    -fx-background-color: white;
+    -fx-background-insets: 2em;
+    -fx-background-radius: 2 2 2 2;
 }
 
 .scroll-bar > .thumb:hover {
@@ -608,22 +608,19 @@
 }
 
 .scroll-bar > .track {
-    -fx-background-color: #4a4a4a;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
+    -fx-background-color: -fx-accent;
+    -fx-background-insets: 0 0 0 0;
+    -fx-background-radius: 2 2 2 2;
 }
 .scroll-bar > .track-background {
     -fx-background-color: #4a4a4a;
-    -fx-background-insets: 0;
+    -fx-background-insets: 0 0 0 0;
 }
 
 .scroll-bar > .increment-button,
 .scroll-bar > .decrement-button {
-    -fx-background-color: #4a4a4a;
     -fx-background-insets: 0;
     -fx-background-radius: 0;
-
-    -fx-padding: 0.25em; /* 3 */
 }
 
 .scroll-bar > .increment-button:hover,
@@ -639,7 +636,6 @@
 .scroll-bar > .decrement-button > .decrement-arrow,
 .scroll-bar > .increment-button > .increment-arrow{
     -fx-background-color: transparent, #1e1e1e;
-    -fx-background-insets: 1 0 -1 0, 0;
     -fx-effect: null;
 }
 
@@ -648,24 +644,24 @@
     -fx-background-color: transparent, -fx-accent-text;
     -fx-effect: null;
 }
-
-.scroll-bar:vertical > .increment-button > .increment-arrow,
+*/
+/*.scroll-bar:vertical > .increment-button > .increment-arrow,
 .scroll-bar:vertical > .decrement-button > .decrement-arrow {
-    -fx-padding: 0.333333em 0.5em 0.0em 0.0em; /* 4 6 0 0 */
+    -fx-padding: 0.333333em 0.5em 0.0em 0.0em; /* 4 6 0 0
 }
 
-.scroll-bar:horizontal > .increment-button > .increment-arrow,
+/*.scroll-bar:horizontal > .increment-button > .increment-arrow,
 .scroll-bar:horizontal > .decrement-button > .decrement-arrow {
-    -fx-padding: 0.5em 0.333333em 0.0em 0.0em; /* 6 4 0 0 */
+    -fx-padding: 0.5em 0.333333em 0.0em 0.0em; /* 6 4 0 0
 }
-
+*/
 
 .scroll-bar:disabled {
     -fx-opacity: 0.4;
 }
 
 /* ARROW SHAPES */
-.scroll-bar:horizontal > .increment-button > .increment-arrow {
+/*.scroll-bar:horizontal > .increment-button > .increment-arrow {
     -fx-shape: "M7.626,12.876L4.251,8.751H7.14L11,12.876L7.14,17H4.251L7.626,12.876z";
 }
 
@@ -680,7 +676,61 @@
 .scroll-bar:vertical > .decrement-button > .decrement-arrow {
     -fx-shape: "M4,17v-2.889l4.124-3.86l4.125,3.86V17l-4.125-3.375L4,17z";
 }
+*/
+.scroll-bar:vertical > .decrement-button > .decrement-arrow,
+.scroll-bar:vertical > .increment-button > .increment-arrow,
+.scroll-bar:horizontal > .decrement-button > .decrement-arrow,
+.scroll-bar:horizontal > .increment-button > .increment-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0em;
+}
 
+/* The main scrollbar **track** CSS class  */
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track {
+	-fx-background-color:   -fx-background;
+	-fx-border-color:   -fx-background;
+	-fx-background-radius: 0em;
+	-fx-border-radius:2em;
+}
+
+/* The increment and decrement button CSS class of scrollbar */
+.scroll-bar:horizontal .increment-button ,
+.scroll-bar:horizontal .decrement-button {
+    -fx-background-color:   -fx-background;
+	-fx-background-radius: 0em;
+	-fx-padding:0 0 10 0;
+
+}
+
+/* The increment and decrement button CSS class of scrollbar */
+
+.scroll-bar:vertical .increment-button ,
+.scroll-bar:vertical .decrement-button {
+    -fx-background-color:   -fx-background;
+	-fx-background-radius: 0em;
+	-fx-padding:0 10 0 0;
+
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow
+ {
+	-fx-shape: " ";
+	-fx-padding:0;
+}
+
+/* The main scrollbar **thumb** CSS class which we drag every time (movable) */
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color:   derive(-fx-background, 30%);
+	-fx-background-insets: 2, 0, 0;
+	-fx-background-radius: 2em;
+
+}
+.scroll-bar > .thumb:pressed {
+    -fx-background-color: -fx-accent;
+}
 /*******************************************************************************
  *                                                                             *
  * ScrollPane                                                                  *
@@ -694,8 +744,8 @@
 
 .scroll-pane .corner {
     -fx-background-color: #4a4a4a;
-    -fx-background-radius: 0 0 0 0;
-    -fx-background-insets: 1 0 0 1; /* have the square on the corner be centered */
+    -fx-background-radius: 2 2 2 2;
+    -fx-background-insets: 2 2 2 2; /* have the square on the corner be centered */
 }
 
 /*******************************************************************************

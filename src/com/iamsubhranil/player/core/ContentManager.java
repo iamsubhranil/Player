@@ -11,10 +11,12 @@ import com.iamsubhranil.player.Preparation;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 
 import javax.xml.bind.DatatypeConverter;
@@ -42,23 +44,21 @@ public class ContentManager {
         int totDocs = contentReader.numDocs();
         while (totDocs > 0) {
             Document song = contentReader.document(totDocs - 1);
-            song.getFields().forEach(field -> {
-                System.out.println(field.name() + "\t" + song.get(field.name()));
-            });
-            albums.add(song.get("Album"));
-            artists.add(song.get("Artist"));
+            albums.add(song.get("AlbumHash"));
+            artists.add(song.get("ArtistHash"));
             totDocs--;
         }
-
+        System.out.println("Total albums : " + albums.size());
+        System.out.println("Total artists : " + artists.size());
         albums.forEach(album -> {
             if (album != null) {
                 try {
-                    TopDocs songs = searchFor("AlbumHash", generateSHAString(album));
-                    Album album1 = new Album(album);
+                    TopDocs songs = searchFor("AlbumHash", album);
+                    Album album1 = new Album(contentReader.document(songs.scoreDocs[0].doc).get("Album"));
                     for (ScoreDoc scoreDoc : songs.scoreDocs) {
                         Document song = contentReader.document(scoreDoc.doc);
-                        album1.addSong(song.get("path"));
-                        album1.addArtist(song.get("Artist"));
+                        album1.addSong(song.get("SongHash"));
+                        album1.addArtist(song.get("ArtistHash"));
                     }
                     albumArrayList.add(album1);
                 } catch (ParseException | IOException e) {
@@ -66,17 +66,16 @@ public class ContentManager {
                 }
             }
         });
-
+        System.out.println("Sorted albums : " + albumArrayList.size());
         artists.forEach(artist -> {
             if (artist != null) {
-                System.out.println(artist);
                 try {
-                    TopDocs songs = searchFor("ArtistHash", generateSHAString(artist));
-                    Artist artist1 = new Artist(artist);
+                    TopDocs songs = searchFor("ArtistHash", artist);
+                    Artist artist1 = new Artist(contentReader.document(songs.scoreDocs[0].doc).get("Artist"));
                     for (ScoreDoc scoreDoc : songs.scoreDocs) {
                         Document song = contentReader.document(scoreDoc.doc);
-                        artist1.addSong(song.get("path"));
-                        artist1.addAlbum(song.get("Album"));
+                        artist1.addSong(song.get("SongHash"));
+                        artist1.addAlbum(song.get("AlbumHash"));
                     }
                     artistArrayList.add(artist1);
                 } catch (ParseException | IOException e) {
@@ -84,6 +83,7 @@ public class ContentManager {
                 }
             }
         });
+        System.out.println("Sorted artists : " + artistArrayList.size());
     }
 
     private static String generateSHAString(String data) {
@@ -110,7 +110,9 @@ public class ContentManager {
         IndexSearcher indexSearcher = new IndexSearcher(contentReader);
         StandardAnalyzer analyzer = new StandardAnalyzer();
         QueryParser parser = new QueryParser(field, analyzer);
-        return indexSearcher.search(parser.parse(text), totalContent - 1);
+
+        TermQuery termQuery = new TermQuery(new Term(field, text));
+        return indexSearcher.search(termQuery, totalContent);
     }
 
     public static void main(String[] args) {

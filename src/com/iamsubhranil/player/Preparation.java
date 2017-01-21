@@ -44,7 +44,7 @@ public class Preparation {
 
     public static void main(String[] args) {
         store();
-        //    load();
+        //      load();
     }
 
     public static IndexReader getIndex() throws IOException {
@@ -66,9 +66,10 @@ public class Preparation {
                     loaded.getFields().forEach(indexableField ->
                             {
                                 metaSet.add(indexableField.name());
-                                //       System.out.println(indexableField.name()+"\t"+loaded.get(indexableField.name()));
                             }
                     );
+                    System.out.println("AlbumHash : " + loaded.get("AlbumHash"));
+                    System.out.println("ArtistHash : " + loaded.get("ArtistHash"));
                     albumSet.add(loaded.get("Album"));
                     artistSet.add(loaded.get("Artist"));
                     docs--;
@@ -107,7 +108,7 @@ public class Preparation {
     }
 
     private static void store() {
-        String directoryToSearch = "/media/iamsubhranil/Entertainment/Songs/English Songs/Enrique Iglesias";
+        String directoryToSearch = "/media/iamsubhranil/Entertainment/Songs";
 
         System.out.println("Starting index..");
 
@@ -147,7 +148,7 @@ public class Preparation {
                     Document document = new Document();
                     TextField field = new TextField("path", fl.getAbsolutePath(), Field.Store.YES);
                     document.add(field);
-                    String totalMeta = "";
+                    String totalMeta = "Path\t" + fl.getAbsolutePath() + "\n";
                     for (String name : metadata.names()) {
                         String val = metadata.get(name);
                         name = name.contains(":") ? name.split(":")[1] : name;
