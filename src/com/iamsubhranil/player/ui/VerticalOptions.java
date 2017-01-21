@@ -8,25 +8,29 @@
 package com.iamsubhranil.player.ui;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class VerticalOptions extends VBox {
 
-    public VerticalOptions() {
+    public VerticalOptions(String header) {
         super();
         setMinWidth(200);
         setPrefHeight(550);
         setFillWidth(true);
         setMaxHeight(Double.MAX_VALUE);
-        //setAlignment(Pos.CENTER);
+
+        Label head = new Label();
+        head.getStyleClass().add("item-title-small");
+        head.setText(header.toUpperCase());
+
+        getChildren().add(head);
     }
 
     public Button addNewButton(String text) {
         Button button = new Button(text);
-        button.setMaxWidth(Double.MAX_VALUE);
         button.getStyleClass().add("button-noborder");
-        button.setStyle("-fx-text-fill: #ffffff;");
         getChildren().add(button);
         setVgrow(button, Priority.ALWAYS);
         return button;

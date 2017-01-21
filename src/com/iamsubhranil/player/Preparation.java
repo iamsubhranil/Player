@@ -12,14 +12,10 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.index.*;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -47,8 +43,8 @@ public class Preparation {
     private static final HashSet<String> artistSet = new HashSet<>();
 
     public static void main(String[] args) {
-        //    store();
-        load();
+        store();
+        //    load();
     }
 
     public static IndexReader getIndex() throws IOException {
@@ -89,16 +85,17 @@ public class Preparation {
             System.out.println("Searching..");
             metaSet.forEach(s -> {
                 //  System.out.println("In " + s + "..");
-                QueryParser queryParser = new QueryParser(s, analyzer);
+                //    QueryParser queryParser = new QueryParser(s, analyzer);
+                TermQuery termQuery = new TermQuery(new Term(s, query));
                 try {
-                    TopDocs topDocs = indexSearcher.search(queryParser.parse(query), 100);
+                    TopDocs topDocs = indexSearcher.search(termQuery, 100000);
                     System.out.println("hits : " + topDocs.totalHits);
                     for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                         Document doc = indexReader.document(scoreDoc.doc);
                         System.out.println("Path : " + doc.get("path"));
                         System.out.println(s + " : " + doc.get(s) + "\n");
                     }
-                } catch (IOException | ParseException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
@@ -110,7 +107,7 @@ public class Preparation {
     }
 
     private static void store() {
-        String directoryToSearch = "/media/iamsubhranil/Entertainment/Songs";
+        String directoryToSearch = "/media/iamsubhranil/Entertainment/Songs/English Songs/Enrique Iglesias";
 
         System.out.println("Starting index..");
 
@@ -156,14 +153,18 @@ public class Preparation {
                         name = name.contains(":") ? name.split(":")[1] : name;
                         name = name.substring(0, 1).toUpperCase() + name.substring(1);
                         metaSet.add(name);
-                        if (val.equals("")) {
+                        if (val == null || val.equals("")) {
                             val = "Unknown";
                         }
                         totalMeta += name + "\t" + val + "\n";
                         TextField metaField = new TextField(name, val, Field.Store.YES);
                         document.add(metaField);
+                        if (name.equals("Album") || name.equals("Artist")) {
+                            StringField field2 = new StringField(name + "Hash", generateSHAString(val), Field.Store.YES);
+                            document.add(field2);
+                        }
                     }
-                    StringField hashField = new StringField("Hash", generateSHAString(totalMeta), Field.Store.YES);
+                    StringField hashField = new StringField("SongHash", generateSHAString(totalMeta), Field.Store.YES);
                     document.add(hashField);
                     indexWriter.addDocument(document);
                 }

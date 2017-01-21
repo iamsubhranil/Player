@@ -64,7 +64,7 @@ public class UITest extends HBox {
         down1.setMinHeight(400);
         down1.setMaxWidth(100);
 
-        VerticalOptions verticalOptions = new VerticalOptions();
+        VerticalOptions verticalOptions = new VerticalOptions("Options");
         Button musicButton = verticalOptions.addNewButton("Songs");
         Button albumButton = verticalOptions.addNewButton("Albums");
         Button artistButton = verticalOptions.addNewButton("Artists");
