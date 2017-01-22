@@ -1110,8 +1110,8 @@
  ******************************************************************************/
 .progress-bar > .bar {
     -fx-padding: 5 5 5 5;
-    -fx-background-color: -fx-accent;
-    -fx-background-radius: 0;
+    -fx-background-color: linear-gradient(to left,-accent-sun, -accent-rose);
+    -fx-background-radius: 5 5 5 5;
     -fx-background-insets: 1;
 
 }
@@ -1119,8 +1119,8 @@
 .progress-bar > .track {
     -fx-padding: 5 5 5 5;
     -fx-background-color: -fx-base;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
+    -fx-background-insets: 1;
+    -fx-background-radius: 5 5 5 5;
 }
 
 /*******************************************************************************

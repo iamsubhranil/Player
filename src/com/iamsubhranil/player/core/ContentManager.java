@@ -20,14 +20,15 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class ContentManager {
 
@@ -35,6 +36,28 @@ public class ContentManager {
     private static ArrayList<Album> albumArrayList = new ArrayList<>();
     private static ArrayList<Artist> artistArrayList = new ArrayList<>();
     private static int totalContent = 0;
+    private static ExecutorService backgroundService;
+
+    public static void startLoadingContent(Runnable onSucceed, Runnable onFailed) {
+        ThreadFactory factory = r -> {
+            Thread thread = new Thread(r);
+            thread.setName("PlayerBackgroundThread");
+            thread.setDaemon(true);
+            return thread;
+        };
+        backgroundService = Executors.newSingleThreadExecutor(factory);
+
+        backgroundService.execute(() -> {
+            try {
+                System.out.println("Loading contents..");
+                loadContents();
+                onSucceed.run();
+            } catch (IOException e) {
+                e.printStackTrace();
+                onFailed.run();
+            }
+        });
+    }
 
     public static void loadContents() throws IOException {
         contentReader = Preparation.getIndex();
@@ -116,9 +139,9 @@ public class ContentManager {
     }
 
     public static void main(String[] args) {
-        try {
-            loadContents();
-            System.setOut(new PrintStream(new FileOutputStream("output.txt")));
+        System.out.println("Starting load..");
+        startLoadingContent(() -> {
+            System.out.println("Loading..");
             artistArrayList.forEach(artist -> {
                 System.out.println("Artist name : " + artist.getName());
                 System.out.println("Total songs : " + artist.getSongs().size());
@@ -131,9 +154,11 @@ public class ContentManager {
                 System.out.println("Total artists : " + album.getArtists().size());
                 System.out.println("\n");
             });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+            System.out.println("Done..");
+        }, () -> {
+            System.out.println("Failed");
+        });
     }
 
 }
