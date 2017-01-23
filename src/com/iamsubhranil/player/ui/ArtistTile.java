@@ -10,7 +10,6 @@ package com.iamsubhranil.player.ui;
 import com.iamsubhranil.player.core.Artist;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 public class ArtistTile extends Tile {
@@ -18,11 +17,13 @@ public class ArtistTile extends Tile {
     public ArtistTile(Artist artist) {
         super(artist.getName());
 
-        VBox box = new VBox(new Label(artist.getAlbums().size() + " albums")
-                , new Label(artist.getSongs().size() + " songs"));
+        //  VBox box = new VBox(new Label(artist.getAlbums().size() + " albums")
+        //          , new Label(artist.getSongs().size() + " songs"));
+        VBox box = new VBox();
         box.setPadding(new Insets(5, 5, 5, 5));
         box.setSpacing(5);
         box.setAlignment(Pos.BOTTOM_LEFT);
+        artist.setPane(box);
 
         setCenter(box);
     }

@@ -21,7 +21,7 @@ public class Tile extends BorderPane {
         label.setStyle("-fx-font-family: \"Bariol Bold\";" +
                 "\n-fx-font-size: 12pt;");
 
-        setPrefSize(150, 150);
+        setPrefSize(170, 170);
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         HBox contrastBox = new HBox(label);

@@ -44,7 +44,7 @@ public class Preparation {
 
     public static void main(String[] args) {
         store();
-        //      load();
+        //        load();
     }
 
     public static IndexReader getIndex() throws IOException {
@@ -108,7 +108,7 @@ public class Preparation {
     }
 
     private static void store() {
-        String directoryToSearch = "/media/iamsubhranil/Entertainment/Songs";
+        String directoryToSearch = "/media/iamsubhranil/Entertainment/Songs/English Songs";
 
         System.out.println("Starting index..");
 

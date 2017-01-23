@@ -8,9 +8,15 @@
 package com.iamsubhranil.player.core;
 
 import com.iamsubhranil.player.Preparation;
+import com.iamsubhranil.player.ui.ArtPuller;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.BinaryDocValuesField;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -18,10 +24,19 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 
+import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -45,18 +60,24 @@ public class ContentManager {
             thread.setDaemon(true);
             return thread;
         };
-        backgroundService = Executors.newSingleThreadExecutor(factory);
+        System.out.println("Creating background thread..");
+        backgroundService = Executors.newSingleThreadExecutor();
 
         backgroundService.execute(() -> {
             try {
                 System.out.println("Loading contents..");
                 loadContents();
                 onSucceed.run();
+                retrieveArtistImages();
             } catch (IOException e) {
                 e.printStackTrace();
                 onFailed.run();
             }
         });
+    }
+
+    public static ExecutorService getBackgroundService() {
+        return backgroundService;
     }
 
     public static void loadContents() throws IOException {
@@ -94,7 +115,7 @@ public class ContentManager {
             if (artist != null) {
                 try {
                     TopDocs songs = searchFor("ArtistHash", artist);
-                    Artist artist1 = new Artist(contentReader.document(songs.scoreDocs[0].doc).get("Artist"));
+                    Artist artist1 = new Artist(contentReader.document(songs.scoreDocs[0].doc).get("Artist"), artist);
                     for (ScoreDoc scoreDoc : songs.scoreDocs) {
                         Document song = contentReader.document(scoreDoc.doc);
                         artist1.addSong(song.get("SongHash"));
@@ -107,6 +128,51 @@ public class ContentManager {
             }
         });
         System.out.println("Sorted artists : " + artistArrayList.size());
+    }
+
+    private static void retrieveArtistImages() {
+        StandardAnalyzer standardAnalyzer = new StandardAnalyzer();
+        IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
+        System.out.println("Retrieving artist images..");
+        try {
+            Directory picIndex = FSDirectory.open(new File("testimages").toPath());
+            IndexWriter iw = new IndexWriter(picIndex, config);
+            artistArrayList.forEach(artist -> {
+                // artist.setImageURL(ArtPuller.getImageURLForArtist(artist.getName()));
+                // artist.applyImageToPane();
+                System.out.println("Artist : " + artist.getName() + "\nHash : " + artist.getArtistHash());
+                String url = ArtPuller.getImageURLForArtist(artist.getName());
+                System.out.println("Artwork pulled from " + url);
+                ByteArrayOutputStream s = new ByteArrayOutputStream();
+                try {
+                    System.out.println("Writing image..");
+                    BufferedImage image = ImageIO.read(new URL(url));
+                    ImageIO.write(image, "png", s);
+                    System.out.println("Creating byte array..");
+                    byte[] res = s.toByteArray();
+                    Document document = new Document();
+                    StringField field = new StringField("ArtistHash", artist.getArtistHash(), Field.Store.YES);
+                    BinaryDocValuesField bdvf = new BinaryDocValuesField("Image", new BytesRef(res));
+                    document.add(field);
+                    document.add(bdvf);
+                    System.out.println("Adding document..\n");
+                    iw.addDocument(document);
+                    System.gc();
+                } catch (MalformedURLException mue) {
+                    System.out.println("URl : " + url);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            System.out.println("Writing index..");
+            iw.commit();
+            picIndex.close();
+            System.out.println("Done..");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //  artistArrayList.forEach(Artist::applyImageToPane);
     }
 
     private static String generateSHAString(String data) {
@@ -140,25 +206,8 @@ public class ContentManager {
 
     public static void main(String[] args) {
         System.out.println("Starting load..");
-        startLoadingContent(() -> {
-            System.out.println("Loading..");
-            artistArrayList.forEach(artist -> {
-                System.out.println("Artist name : " + artist.getName());
-                System.out.println("Total songs : " + artist.getSongs().size());
-                System.out.println("Total albums : " + artist.getAlbums().size());
-                System.out.println("\n");
-            });
-            albumArrayList.forEach(album -> {
-                System.out.println("Album name : " + album.getName());
-                System.out.println("Total songs : " + album.getSongs().size());
-                System.out.println("Total artists : " + album.getArtists().size());
-                System.out.println("\n");
-            });
-
-            System.out.println("Done..");
-        }, () -> {
-            System.out.println("Failed");
-        });
+        startLoadingContent(() ->
+                System.out.println("Content loaded.."), () -> System.out.println("Failed.."));
     }
 
 }

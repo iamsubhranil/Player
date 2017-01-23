@@ -23,7 +23,14 @@ public class AlbumTile extends Tile {
         box.setPadding(new Insets(5, 5, 5, 5));
         box.setSpacing(5);
         box.setAlignment(Pos.BOTTOM_LEFT);
-
+        try {
+            String image = ArtPuller.pullAlbumArt("", album.getName());
+            box.setStyle("-fx-background-image: url('" + image + "'); " +
+                    "-fx-background-position: center center; " +
+                    "-fx-background-repeat: stretch;");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setCenter(box);
     }
 
