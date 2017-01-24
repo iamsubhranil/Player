@@ -59,35 +59,54 @@ public class Preparation {
         return DirectoryReader.open(FSDirectory.open(directoryToArtistArtStore.toPath()));
     }
 
+    /*
+        This method creates artist art index for all artists present in library,
+        got using ContentManager.getArtistArrayList method.
+
+     */
     public static boolean createArtistArtIndex() {
+        //Get the artist list
         ArrayList<Artist> artistArrayList = ContentManager.getArtistArrayList();
+        //Create lucene configs
         StandardAnalyzer standardAnalyzer = new StandardAnalyzer();
         IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
         System.out.println("Retrieving artist images..");
+        //Flag to check if the index creation is successful
         final boolean[] hasSucceed = {true};
         try {
+            //Open directory for index
             Directory picIndex = FSDirectory.open(directoryToArtistArtStore.toPath());
+            //Open writer
             IndexWriter iw = new IndexWriter(picIndex, config);
+            //Apply for each artist
             artistArrayList.forEach(artist -> {
-                // artist.setImageURL(ArtPuller.getImageURLForArtist(artist.getName()));
-                // artist.applyImageToPane();
                 System.out.println("Artist : " + artist.getName() + "\nHash : " + artist.getArtistHash());
+                //Pull artwork from last.fm api, if any matching artwork is found,
+                //The called method returns a default image if last.fm couldn't retrieve the artist
                 String url = ArtPuller.getImageURLForArtist(artist.getName());
                 System.out.println("Artwork pulled from " + url);
                 ByteArrayOutputStream s = new ByteArrayOutputStream();
                 try {
                     System.out.println("Writing image..");
+                    //Read the image using the received url
                     BufferedImage image = ImageIO.read(new URL(url));
+                    //Write the image to the ByteArrayOutputStream to convert it to raw byte[]
                     ImageIO.write(image, "png", s);
                     System.out.println("Creating byte array..");
                     byte[] res = s.toByteArray();
+                    //Create a new document for storing to the index
                     Document document = new Document();
+                    //This is the primary key of the index, the artist hash
                     StringField field = new StringField("ArtistHash", artist.getArtistHash(), Field.Store.YES);
+                    //This is the raw image data field
                     StoredField field1 = new StoredField("Image", new BytesRef(res));
+                    //Add the fields to the document
                     document.add(field);
                     document.add(field1);
                     System.out.println("Adding document..\n");
+                    //Add the document to index
                     iw.addDocument(document);
+                    //Garbage collect any leftover image objects, as they are very memory hungry
                     System.gc();
                 } catch (MalformedURLException mue) {
                     System.out.println("URl : " + url);
@@ -98,7 +117,9 @@ public class Preparation {
                 }
             });
             System.out.println("Writing index..");
+            //Write out and close the index
             iw.commit();
+            iw.close();
             picIndex.close();
             System.out.println("Done..");
         } catch (IOException e) {

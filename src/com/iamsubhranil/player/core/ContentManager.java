@@ -120,10 +120,9 @@ public class ContentManager {
        This method will be user controllable in some future release.
        When called, this method first checks if there is at all any lucene index files present.
        If there is no index files present, this method calls Preparation.createArtistIndex method, which
-       retrieves artist images using last.fm api, and saves the lucene index.
+       retrieves artist images from the internet using last.fm api, and saves the lucene index.
        This method then loads the index, searches for each artist's image using the artist name hash,
        and applies the image to the specific artist tile set by Artist.setPane method.
-       The retrieval process continue as usual afterwards.
      */
     private static void retrieveArtistImages() {
         boolean showImages = true;
