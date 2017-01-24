@@ -7,15 +7,14 @@
 */
 package com.iamsubhranil.player;
 
-import com.iamsubhranil.player.ui.ArtPuller;
 import com.iamsubhranil.player.ui.ReUI;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import radams.gracenote.webapi.GracenoteException;
-import radams.gracenote.webapi.GracenoteWebAPI;
+//import radams.gracenote.webapi.GracenoteException;
+//import radams.gracenote.webapi.GracenoteWebAPI;
 
 public class Starter extends Application {
 
@@ -51,7 +50,7 @@ public class Starter extends Application {
         Font.loadFont(getClass().getResourceAsStream("/styles/fonts/Bariol_Bold.ttf"), 14);
     }
 
-    private void prepareGracenote() {
+ /*   private void prepareGracenote() {
         GracenoteWebAPI api = null; // If you have a userID, you can specify it as the third parameter to constructor.
         try {
             api = new GracenoteWebAPI(clientID, clientTag);
@@ -61,4 +60,5 @@ public class Starter extends Application {
             e.printStackTrace();
         }
     }
+    */
 }

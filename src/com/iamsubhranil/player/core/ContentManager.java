@@ -8,35 +8,20 @@
 package com.iamsubhranil.player.core;
 
 import com.iamsubhranil.player.Preparation;
-import com.iamsubhranil.player.ui.ArtPuller;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.BinaryDocValuesField;
+import com.iamsubhranil.player.db.Environment;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 
-import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -47,7 +32,8 @@ import java.util.concurrent.ThreadFactory;
 
 public class ContentManager {
 
-    private static IndexReader contentReader;
+    private static IndexReader songIndexReader;
+    private static IndexReader artistArtIndexReader;
     private static ArrayList<Album> albumArrayList = new ArrayList<>();
     private static ArrayList<Artist> artistArrayList = new ArrayList<>();
     private static int totalContent = 0;
@@ -61,12 +47,12 @@ public class ContentManager {
             return thread;
         };
         System.out.println("Creating background thread..");
-        backgroundService = Executors.newSingleThreadExecutor();
+        backgroundService = Executors.newSingleThreadExecutor(factory);
 
         backgroundService.execute(() -> {
             try {
                 System.out.println("Loading contents..");
-                loadContents();
+                loadSongStore();
                 onSucceed.run();
                 retrieveArtistImages();
             } catch (IOException e) {
@@ -80,14 +66,14 @@ public class ContentManager {
         return backgroundService;
     }
 
-    public static void loadContents() throws IOException {
-        contentReader = Preparation.getIndex();
+    public static void loadSongStore() throws IOException {
+        songIndexReader = Preparation.getSongIndex();
         HashSet<String> albums = new HashSet<>();
         HashSet<String> artists = new HashSet<>();
-        totalContent = contentReader.numDocs();
-        int totDocs = contentReader.numDocs();
+        totalContent = songIndexReader.numDocs();
+        int totDocs = songIndexReader.numDocs();
         while (totDocs > 0) {
-            Document song = contentReader.document(totDocs - 1);
+            Document song = songIndexReader.document(totDocs - 1);
             albums.add(song.get("AlbumHash"));
             artists.add(song.get("ArtistHash"));
             totDocs--;
@@ -97,10 +83,10 @@ public class ContentManager {
         albums.forEach(album -> {
             if (album != null) {
                 try {
-                    TopDocs songs = searchFor("AlbumHash", album);
-                    Album album1 = new Album(contentReader.document(songs.scoreDocs[0].doc).get("Album"));
+                    TopDocs songs = searchFor("AlbumHash", album, songIndexReader);
+                    Album album1 = new Album(songIndexReader.document(songs.scoreDocs[0].doc).get("Album"));
                     for (ScoreDoc scoreDoc : songs.scoreDocs) {
-                        Document song = contentReader.document(scoreDoc.doc);
+                        Document song = songIndexReader.document(scoreDoc.doc);
                         album1.addSong(song.get("SongHash"));
                         album1.addArtist(song.get("ArtistHash"));
                     }
@@ -114,10 +100,10 @@ public class ContentManager {
         artists.forEach(artist -> {
             if (artist != null) {
                 try {
-                    TopDocs songs = searchFor("ArtistHash", artist);
-                    Artist artist1 = new Artist(contentReader.document(songs.scoreDocs[0].doc).get("Artist"), artist);
+                    TopDocs songs = searchFor("ArtistHash", artist, songIndexReader);
+                    Artist artist1 = new Artist(songIndexReader.document(songs.scoreDocs[0].doc).get("Artist"), artist);
                     for (ScoreDoc scoreDoc : songs.scoreDocs) {
-                        Document song = contentReader.document(scoreDoc.doc);
+                        Document song = songIndexReader.document(scoreDoc.doc);
                         artist1.addSong(song.get("SongHash"));
                         artist1.addAlbum(song.get("AlbumHash"));
                     }
@@ -130,49 +116,50 @@ public class ContentManager {
         System.out.println("Sorted artists : " + artistArrayList.size());
     }
 
+    /* Method to retrieve and show artist images.
+       This method will be user controllable in some future release.
+       When called, this method first checks if there is at all any lucene index files present.
+       If there is no index files present, this method calls Preparation.createArtistIndex method, which
+       retrieves artist images using last.fm api, and saves the lucene index.
+       This method then loads the index, searches for each artist's image using the artist name hash,
+       and applies the image to the specific artist tile set by Artist.setPane method.
+       The retrieval process continue as usual afterwards.
+     */
     private static void retrieveArtistImages() {
-        StandardAnalyzer standardAnalyzer = new StandardAnalyzer();
-        IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
-        System.out.println("Retrieving artist images..");
-        try {
-            Directory picIndex = FSDirectory.open(new File("testimages").toPath());
-            IndexWriter iw = new IndexWriter(picIndex, config);
-            artistArrayList.forEach(artist -> {
-                // artist.setImageURL(ArtPuller.getImageURLForArtist(artist.getName()));
-                // artist.applyImageToPane();
-                System.out.println("Artist : " + artist.getName() + "\nHash : " + artist.getArtistHash());
-                String url = ArtPuller.getImageURLForArtist(artist.getName());
-                System.out.println("Artwork pulled from " + url);
-                ByteArrayOutputStream s = new ByteArrayOutputStream();
-                try {
-                    System.out.println("Writing image..");
-                    BufferedImage image = ImageIO.read(new URL(url));
-                    ImageIO.write(image, "png", s);
-                    System.out.println("Creating byte array..");
-                    byte[] res = s.toByteArray();
-                    Document document = new Document();
-                    StringField field = new StringField("ArtistHash", artist.getArtistHash(), Field.Store.YES);
-                    BinaryDocValuesField bdvf = new BinaryDocValuesField("Image", new BytesRef(res));
-                    document.add(field);
-                    document.add(bdvf);
-                    System.out.println("Adding document..\n");
-                    iw.addDocument(document);
-                    System.gc();
-                } catch (MalformedURLException mue) {
-                    System.out.println("URl : " + url);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            System.out.println("Writing index..");
-            iw.commit();
-            picIndex.close();
-            System.out.println("Done..");
-        } catch (IOException e) {
-            e.printStackTrace();
+        boolean showImages = true;
+        //Check to see if there is at all any index files present
+        if (!Environment.hasArtistImageIndex()) {
+            //If there isn't, first download images and create the index
+            showImages = Preparation.createArtistArtIndex();
         }
-
-        //  artistArrayList.forEach(Artist::applyImageToPane);
+        //If index creation succeeds, try to show the images
+        if (showImages) {
+            try {
+                //Get the index reader
+                artistArtIndexReader = Preparation.getArtistArtIndex();
+                artistArrayList.forEach(artist -> {
+                    try {
+                        //Search for the document in the index containing artist hash
+                        TopDocs artistDoc = searchFor("ArtistHash", artist.getArtistHash(), artistArtIndexReader);
+                        //If there is at all any documents matched with the corresponding artist hash
+                        if (artistDoc.scoreDocs.length > 0) {
+                            //Retrieve the document
+                            Document artDoc = artistArtIndexReader.document(artistDoc.scoreDocs[0].doc);
+                            //Retrieve the binary image data
+                            BytesRef imageBytes = artDoc.getBinaryValue("Image");
+                            //Call the method
+                            artist.setBackgroundImage(imageBytes.bytes);
+                            //Wait some time before next image to avoid UI freezing
+                            Thread.sleep(100);
+                        }
+                    } catch (ParseException | IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static String generateSHAString(String data) {
@@ -195,11 +182,8 @@ public class ContentManager {
         return artistArrayList;
     }
 
-    public static TopDocs searchFor(String field, String text) throws ParseException, IOException {
+    public static TopDocs searchFor(String field, String text, IndexReader contentReader) throws ParseException, IOException {
         IndexSearcher indexSearcher = new IndexSearcher(contentReader);
-        StandardAnalyzer analyzer = new StandardAnalyzer();
-        QueryParser parser = new QueryParser(field, analyzer);
-
         TermQuery termQuery = new TermQuery(new Term(field, text));
         return indexSearcher.search(termQuery, totalContent);
     }

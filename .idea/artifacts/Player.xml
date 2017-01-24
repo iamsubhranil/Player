@@ -14,6 +14,20 @@
     <root id="root">
       <element id="archive" name="Player.jar">
         <element id="module-output" name="Player" />
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="extracted-dir" path="$PROJECT_DIR$/../playerextras/lucene-6.3.0/core/lucene-core-6.3.0.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/../playerextras/lucene-6.3.0/queries/lucene-queries-6.3.0.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/../playerextras/lucene-6.3.0/queryparser/lucene-queryparser-6.3.0.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/../playerextras/tika-1.14/tika-core/target/tika-core-1.14.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/../playerextras/tika-parsers-1.14.jar" path-in-jar="/" />
+      </element>
+      <element id="directory" name="tempArtistArts">
+        <element id="dir-copy" path="$PROJECT_DIR$/tempArtistArts" />
+      </element>
+      <element id="directory" name="tempSongStore">
+        <element id="dir-copy" path="$PROJECT_DIR$/tempSongStore" />
       </element>
     </root>
   </artifact>

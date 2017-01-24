@@ -223,7 +223,7 @@ public class UITest extends HBox {
         ExecutorService background = Executors.newCachedThreadPool();
         background.execute(() -> {
             try {
-                IndexReader reader = Preparation.getIndex();
+                IndexReader reader = Preparation.getSongIndex();
                 ArrayList<Document> arrayList = new ArrayList<>();
                 int totDocs = reader.numDocs();
                 while (totDocs > 0) {

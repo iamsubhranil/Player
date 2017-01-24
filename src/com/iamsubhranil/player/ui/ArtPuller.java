@@ -11,7 +11,7 @@ import de.umass.lastfm.Artist;
 import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.PaginatedResult;
 import javafx.scene.image.Image;
-import radams.gracenote.webapi.GracenoteWebAPI;
+//import radams.gracenote.webapi.GracenoteWebAPI;
 
 public class ArtPuller {
 
@@ -21,14 +21,14 @@ public class ArtPuller {
     private static final String lastFMUsername = "iamsubhranil";
     private static final String lastFMApplicationName = "Player";
     private static final String defaultImage = ArtPuller.class.getResource("noart.png").toExternalForm();
-    private static GracenoteWebAPI gracenoteWebAPI = null;
+    //  private static GracenoteWebAPI gracenoteWebAPI = null;
 
     static {
         //  String token = Authenticator.getToken(lastFMAPIKey);
         // Session session = Authenticator.getSession(token,lastFMAPIKey,lastFMSharedSecret);
     }
 
-    public static void setGracenoteWebAPI(GracenoteWebAPI gwapi) {
+   /* public static void setGracenoteWebAPI(GracenoteWebAPI gwapi) {
         gracenoteWebAPI = gwapi;
     }
 
@@ -39,7 +39,7 @@ public class ArtPuller {
         } catch (Exception gne) {
         }
         return URL;
-    }
+    }*/
 
     public static void main(String[] args) {
         System.out.println(Artist.getInfo("habijabi", lastFMAPIKey2).getImageURL(ImageSize.SMALL));
@@ -71,7 +71,7 @@ public class ArtPuller {
         return grabbedImage;
     }
 
-    public static String pullAlbumArt(String artist, String album) {
+/*    public static String pullAlbumArt(String artist, String album) {
         String URL = ArtPuller.class.getResource("noart.png").toExternalForm();
         try {
             URL = gracenoteWebAPI.searchAlbum(artist, album).getURL("album_coverart");
@@ -79,5 +79,5 @@ public class ArtPuller {
         }
         return URL;
     }
-
+*/
 }

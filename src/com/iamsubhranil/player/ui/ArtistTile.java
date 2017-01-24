@@ -23,7 +23,7 @@ public class ArtistTile extends Tile {
         box.setPadding(new Insets(5, 5, 5, 5));
         box.setSpacing(5);
         box.setAlignment(Pos.BOTTOM_LEFT);
-        artist.setPane(box);
+        box.backgroundProperty().bind(artist.backgroundImageProperty());
 
         setCenter(box);
     }

@@ -7,18 +7,20 @@
 */
 package com.iamsubhranil.player;
 
+import com.iamsubhranil.player.core.Artist;
+import com.iamsubhranil.player.core.ContentManager;
+import com.iamsubhranil.player.db.Environment;
+import com.iamsubhranil.player.db.SearchScope;
+import com.iamsubhranil.player.ui.ArtPuller;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.*;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.document.*;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -27,109 +29,122 @@ import org.apache.tika.parser.mp3.Mp3Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.SAXException;
 
+import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class Preparation {
 
-    private static final String directoryToStore = "testindex";
+    private static final File directoryToSongStore = Environment.getDirectoryToSongStore();
+    private static final File directoryToArtistArtStore = Environment.getDirectoryToArtistArtStore();
     private static final Tika tika = new Tika();
     private static final Mp3Parser parser = new Mp3Parser();
-    private static final HashSet<String> metaSet = new HashSet<>();
-    private static final HashSet<String> albumSet = new HashSet<>();
-    private static final HashSet<String> artistSet = new HashSet<>();
 
     public static void main(String[] args) {
-        store();
+        createSongsIndex();
         //        load();
     }
 
-    public static IndexReader getIndex() throws IOException {
-        return DirectoryReader.open(FSDirectory.open(new File(directoryToStore).toPath()));
+    public static IndexReader getSongIndex() throws IOException {
+        return DirectoryReader.open(FSDirectory.open(directoryToSongStore.toPath()));
     }
 
-    private static void load() {
-        System.out.println("Starting load..");
+    public static IndexReader getArtistArtIndex() throws IOException {
+        return DirectoryReader.open(FSDirectory.open(directoryToArtistArtStore.toPath()));
+    }
+
+    public static boolean createArtistArtIndex() {
+        ArrayList<Artist> artistArrayList = ContentManager.getArtistArrayList();
+        StandardAnalyzer standardAnalyzer = new StandardAnalyzer();
+        IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
+        System.out.println("Retrieving artist images..");
+        final boolean[] hasSucceed = {true};
         try {
-            Directory loadedIndex = FSDirectory.open(new File(directoryToStore).toPath());
-            System.out.println("Reading index..");
-            IndexReader indexReader = DirectoryReader.open(loadedIndex);
-            int docs = indexReader.numDocs();
-            if (metaSet.size() == 0) {
-                System.out.println("Populating metaset..");
-                while (docs > 0) {
-                    //    System.out.println("\n");
-                    Document loaded = indexReader.document(docs - 1);
-                    loaded.getFields().forEach(indexableField ->
-                            {
-                                metaSet.add(indexableField.name());
-                            }
-                    );
-                    System.out.println("AlbumHash : " + loaded.get("AlbumHash"));
-                    System.out.println("ArtistHash : " + loaded.get("ArtistHash"));
-                    albumSet.add(loaded.get("Album"));
-                    artistSet.add(loaded.get("Artist"));
-                    docs--;
-                }
-            }
-            System.out.println("Total " + artistSet.size() + " artists and " + albumSet.size() + " albums in " + indexReader.numDocs() + " songs..");
-            IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-            StandardAnalyzer analyzer = new StandardAnalyzer();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            System.out.println("Enter search text : ");
-            String query = reader.readLine();
-
-            System.out.println("Searching..");
-            metaSet.forEach(s -> {
-                //  System.out.println("In " + s + "..");
-                //    QueryParser queryParser = new QueryParser(s, analyzer);
-                TermQuery termQuery = new TermQuery(new Term(s, query));
+            Directory picIndex = FSDirectory.open(directoryToArtistArtStore.toPath());
+            IndexWriter iw = new IndexWriter(picIndex, config);
+            artistArrayList.forEach(artist -> {
+                // artist.setImageURL(ArtPuller.getImageURLForArtist(artist.getName()));
+                // artist.applyImageToPane();
+                System.out.println("Artist : " + artist.getName() + "\nHash : " + artist.getArtistHash());
+                String url = ArtPuller.getImageURLForArtist(artist.getName());
+                System.out.println("Artwork pulled from " + url);
+                ByteArrayOutputStream s = new ByteArrayOutputStream();
                 try {
-                    TopDocs topDocs = indexSearcher.search(termQuery, 100000);
-                    System.out.println("hits : " + topDocs.totalHits);
-                    for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
-                        Document doc = indexReader.document(scoreDoc.doc);
-                        System.out.println("Path : " + doc.get("path"));
-                        System.out.println(s + " : " + doc.get(s) + "\n");
-                    }
+                    System.out.println("Writing image..");
+                    BufferedImage image = ImageIO.read(new URL(url));
+                    ImageIO.write(image, "png", s);
+                    System.out.println("Creating byte array..");
+                    byte[] res = s.toByteArray();
+                    Document document = new Document();
+                    StringField field = new StringField("ArtistHash", artist.getArtistHash(), Field.Store.YES);
+                    StoredField field1 = new StoredField("Image", new BytesRef(res));
+                    document.add(field);
+                    document.add(field1);
+                    System.out.println("Adding document..\n");
+                    iw.addDocument(document);
+                    System.gc();
+                } catch (MalformedURLException mue) {
+                    System.out.println("URl : " + url);
+                    hasSucceed[0] = false;
                 } catch (IOException e) {
                     e.printStackTrace();
+                    hasSucceed[0] = false;
                 }
             });
-            indexReader.close();
-            loadedIndex.close();
+            System.out.println("Writing index..");
+            iw.commit();
+            picIndex.close();
+            System.out.println("Done..");
         } catch (IOException e) {
+            hasSucceed[0] = false;
             e.printStackTrace();
         }
+        return hasSucceed[0];
     }
 
-    private static void store() {
-        String directoryToSearch = "/media/iamsubhranil/Entertainment/Songs/English Songs";
+    public static boolean createSongsIndex() {
+
+        if (SearchScope.getSearchScopes().isEmpty())
+            return false;
+
+        boolean hasSucceed;
 
         System.out.println("Starting index..");
 
         StandardAnalyzer analyzer = new StandardAnalyzer();
 
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
+        IndexWriter w;
 
         try {
-            Directory index = FSDirectory.open(new File(directoryToStore).toPath());
-            IndexWriter w = new IndexWriter(index, config);
+            Directory index = FSDirectory.open(directoryToSongStore.toPath());
+            w = new IndexWriter(index, config);
             System.out.println("Analyzing directory..");
-            indexFolder(new File(directoryToSearch), w);
+            SearchScope.getSearchScopes().forEach(scope -> {
+                try {
+                    indexFolder(scope, w);
+                } catch (IOException | TikaException | SAXException e) {
+                    e.printStackTrace();
+                }
+            });
             System.out.println("Writing out..");
             w.commit();
             System.out.println("Closing index..");
             w.close();
             index.close();
             System.out.println("Done..");
-        } catch (IOException | TikaException | SAXException e) {
+            hasSucceed = true;
+        } catch (IOException e) {
             e.printStackTrace();
+            hasSucceed = false;
         }
+        return hasSucceed;
     }
 
     private static void indexFolder(File f, IndexWriter indexWriter) throws IOException, TikaException, SAXException {
@@ -139,7 +154,7 @@ public class Preparation {
             if (fl.isDirectory()) {
                 indexFolder(fl, indexWriter);
             } else {
-                if (tika.detect(fl).startsWith("audio")) {
+                if (tika.detect(fl).startsWith("audio/mpeg")) {
                     BodyContentHandler handler = new BodyContentHandler();
                     Metadata metadata = new Metadata();
                     ParseContext context = new ParseContext();
@@ -153,7 +168,6 @@ public class Preparation {
                         String val = metadata.get(name);
                         name = name.contains(":") ? name.split(":")[1] : name;
                         name = name.substring(0, 1).toUpperCase() + name.substring(1);
-                        metaSet.add(name);
                         if (val == null || val.equals("")) {
                             val = "Unknown";
                         }

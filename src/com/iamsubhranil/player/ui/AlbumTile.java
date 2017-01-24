@@ -24,7 +24,7 @@ public class AlbumTile extends Tile {
         box.setSpacing(5);
         box.setAlignment(Pos.BOTTOM_LEFT);
         try {
-            String image = ArtPuller.pullAlbumArt("", album.getName());
+            String image = ArtPuller.getDefaultImage();
             box.setStyle("-fx-background-image: url('" + image + "'); " +
                     "-fx-background-position: center center; " +
                     "-fx-background-repeat: stretch;");
