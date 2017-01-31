@@ -5,9 +5,13 @@
     Package : com.iamsubhranil.player
     Project : Player
 */
-package com.iamsubhranil.player.ui;
+package com.iamsubhranil.player.ui.panes;
 
-import com.iamsubhranil.player.core.ContentManager;
+import com.iamsubhranil.player.db.ContentManager;
+import com.iamsubhranil.player.ui.components.AlbumTile;
+import com.iamsubhranil.player.ui.components.ArtistTile;
+import com.iamsubhranil.player.ui.components.SwapPane;
+import com.iamsubhranil.player.ui.components.VerticalOptions;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -86,22 +90,30 @@ public class ContentBox extends BorderPane {
     }
 
     public void layoutContents() {
-        TilePane tilePane = new TilePane();
-        tilePane.setHgap(20);
-        tilePane.setVgap(20);
+        TilePane tilePane = createTilePane();
         ContentManager.getArtistArrayList().forEach(artist -> {
             ArtistTile a = new ArtistTile(artist);
             tilePane.getChildren().add(a);
         });
-        artistPane.getChildren().add(new ScrollPane(tilePane));
-        TilePane tilePane2 = new TilePane();
-        tilePane2.setHgap(20);
-        tilePane2.setVgap(20);
+        artistPane.getChildren().add(createScrollPane(tilePane));
+        TilePane tilePane2 = createTilePane();
         ContentManager.getAlbumArrayList().forEach(album -> {
             AlbumTile a = new AlbumTile(album);
             tilePane2.getChildren().add(a);
         });
-        albumPane.getChildren().add(new ScrollPane(tilePane2));
+        albumPane.getChildren().add(createScrollPane(tilePane2));
+    }
+
+    private ScrollPane createScrollPane(TilePane p) {
+        ScrollPane sp1 = new ScrollPane(p);
+        return sp1;
+    }
+
+    private TilePane createTilePane() {
+        TilePane tilePane = new TilePane();
+        tilePane.setHgap(20);
+        tilePane.setVgap(20);
+        return tilePane;
     }
 
 }

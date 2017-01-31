@@ -7,8 +7,9 @@
 */
 package com.iamsubhranil.player;
 
-import com.iamsubhranil.player.ui.HorizontalOptions;
-import com.iamsubhranil.player.ui.VerticalOptions;
+import com.iamsubhranil.player.db.Preparation;
+import com.iamsubhranil.player.ui.components.HorizontalOptions;
+import com.iamsubhranil.player.ui.components.VerticalOptions;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;

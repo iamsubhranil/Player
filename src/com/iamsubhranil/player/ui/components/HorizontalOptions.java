@@ -5,7 +5,7 @@
     Package : com.iamsubhranil.player.ui
     Project : Player
 */
-package com.iamsubhranil.player.ui;
+package com.iamsubhranil.player.ui.components;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;

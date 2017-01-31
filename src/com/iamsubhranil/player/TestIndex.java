@@ -7,6 +7,7 @@
 */
 package com.iamsubhranil.player;
 
+import com.iamsubhranil.player.db.Preparation;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -86,6 +87,19 @@ public class TestIndex {
             loadedIndex.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        //   Preparation.main(args);
+        IndexReader reader = Preparation.getSongIndex();
+        int totalContents = reader.numDocs();
+        while (totalContents > 0) {
+            Document doc = reader.document(totalContents - 1);
+            if (doc.get("Artist") == null) {
+                System.out.println(doc + "\n");
+            }
+            totalContents--;
         }
     }
 

@@ -5,8 +5,9 @@
     Package : com.iamsubhranil.player.ui
     Project : Player
 */
-package com.iamsubhranil.player.ui;
+package com.iamsubhranil.player.core;
 
+import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
 import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.PaginatedResult;
@@ -20,13 +21,11 @@ public class ArtPuller {
     private static final String lastFMSharedSecret = "6e61bcb4a0e4e956ddf6157dbbfe5bcb";
     private static final String lastFMUsername = "iamsubhranil";
     private static final String lastFMApplicationName = "Player";
-    private static final String defaultImage = ArtPuller.class.getResource("noart.png").toExternalForm();
+    private static final String defaultImage = ArtPuller.class.getResource("noart_2.png").toExternalForm();
+    private static long startTime = 0;
+    private static long endTime = 0;
+    private static int count = 0;
     //  private static GracenoteWebAPI gracenoteWebAPI = null;
-
-    static {
-        //  String token = Authenticator.getToken(lastFMAPIKey);
-        // Session session = Authenticator.getSession(token,lastFMAPIKey,lastFMSharedSecret);
-    }
 
    /* public static void setGracenoteWebAPI(GracenoteWebAPI gwapi) {
         gracenoteWebAPI = gwapi;
@@ -42,17 +41,18 @@ public class ArtPuller {
     }*/
 
     public static void main(String[] args) {
-        System.out.println(Artist.getInfo("habijabi", lastFMAPIKey2).getImageURL(ImageSize.SMALL));
+        System.out.println(Album.getInfo("Enrique Iglesias", "7", lastFMAPIKey2).availableSizes());
     }
 
     public static String getImageURLForArtist(String artistName) {
         String ret = defaultImage;
-
+        if (startTime == 0)
+            startTime = System.currentTimeMillis();
         try {
             ret = Artist.getInfo(artistName, lastFMAPIKey2).getImageURL(ImageSize.LARGE);
         } catch (Exception e) {
         }
-        if (ret.equals(""))
+        if (ret == null || ret.equals(""))
             ret = defaultImage;
         return ret;
     }
@@ -80,4 +80,16 @@ public class ArtPuller {
         return URL;
     }
 */
+
+    public static String pullAlbumArt(String album, String artistName) {
+        String ret = defaultImage;
+        try {
+            System.out.println("Album : " + album + "\t Artist : " + artistName);
+            ret = Album.getInfo(artistName, album, lastFMAPIKey2).getImageURL(ImageSize.LARGE);
+        } catch (Exception e) {
+        }
+        if (ret == null || ret.equals(""))
+            ret = defaultImage;
+        return ret;
+    }
 }

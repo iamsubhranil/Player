@@ -24,10 +24,10 @@
         <element id="extracted-dir" path="$PROJECT_DIR$/../playerextras/tika-parsers-1.14.jar" path-in-jar="/" />
       </element>
       <element id="directory" name="tempArtistArts">
-        <element id="dir-copy" path="$PROJECT_DIR$/tempArtistArts" />
+        <element id="dir-copy" path="$PROJECT_DIR$/tempArtistArts2" />
       </element>
       <element id="directory" name="tempSongStore">
-        <element id="dir-copy" path="$PROJECT_DIR$/tempSongStore" />
+        <element id="dir-copy" path="$PROJECT_DIR$/tempSongStore2" />
       </element>
     </root>
   </artifact>

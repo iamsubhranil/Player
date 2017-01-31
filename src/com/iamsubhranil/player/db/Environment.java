@@ -7,6 +7,10 @@
 */
 package com.iamsubhranil.player.db;
 
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.store.FSDirectory;
+
 import java.io.File;
 
 public class Environment {
@@ -14,32 +18,29 @@ public class Environment {
     private static final File directoryToSongStore = new File("tempSongStore");
     private static final File directoryToArtistArtStore = new File("tempArtistArts");
     private static final File directoryToAlbumArtStore = new File("tempAlbumArts");
+    private static final File searchScopeFile = new File("search.scopes");
 
     public static boolean hasSongIndex() {
-        return hasIndex(directoryToSongStore, "_0.cfs", "_0.cfe");
+        return hasIndex(directoryToSongStore);
     }
 
     public static boolean hasArtistImageIndex() {
-        return hasIndex(directoryToArtistArtStore, "_0.cfs", "_0.cfe");
+        return hasIndex(directoryToArtistArtStore);
     }
 
     public static boolean hasAlbumImageIndex() {
-        return hasIndex(directoryToAlbumArtStore, "_0.cfs", "_0.cfe");
+        return hasIndex(directoryToAlbumArtStore);
     }
 
-    private static boolean hasIndex(File dirToLook, String... expectedFiles) {
-        if (!dirToLook.exists() || !dirToLook.isDirectory())
+    private static boolean hasIndex(File dirToLook) {
+        try {
+            IndexReader reader = DirectoryReader.open(FSDirectory.open(dirToLook.toPath()));
+            reader.close();
+            return true;
+        } catch (Exception e) {
+            dirToLook.delete();
             return false;
-        String[] indexFiles = dirToLook.list();
-        if (indexFiles == null || indexFiles.length == 0)
-            return false;
-        int c = 0;
-        boolean ret = true;
-        for (String expect : expectedFiles) {
-            ret = (ret && indexFiles[c].equals(expect));
-            c++;
         }
-        return ret;
     }
 
     public static boolean hasSearchScope() {
@@ -56,6 +57,10 @@ public class Environment {
 
     public static File getDirectoryToSongStore() {
         return directoryToSongStore;
+    }
+
+    public static File getSearchScopeFile() {
+        return searchScopeFile;
     }
 
     public static void main(String[] args) {

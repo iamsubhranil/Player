@@ -7,36 +7,31 @@
 */
 package com.iamsubhranil.player.core;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
-public class Album {
+public class Album extends Bundle {
 
-    private final String name;
-    private final HashSet<String> artists = new HashSet<>();
-    private final ArrayList<String> songs = new ArrayList<>();
+    private final HashSet<String> artists = new HashSet<>(0);
+    private final HashSet<String> artistNames = new HashSet<>(0);
 
-    public Album(String albumName) {
-        name = albumName;
+    public Album(String albumName, String albumHash) {
+        super(albumName, albumHash, BundleType.ALBUM);
     }
 
-    public void addArtist(String name) {
-        artists.add(name);
-    }
-
-    public void addSong(String path) {
-        songs.add(path);
-    }
-
-    public String getName() {
-        return name;
+    public void addArtist(Artist artist) {
+        artists.add(artist.getHash());
+        artistNames.add(artist.getName().trim());
     }
 
     public HashSet<String> getArtists() {
         return artists;
     }
 
-    public ArrayList<String> getSongs() {
-        return songs;
+    public HashSet<String> getArtistNames() {
+        return artistNames;
+    }
+
+    public String toString() {
+        return super.toString().replace("]", "").replace("Bundle", "Album") + ",artists=" + artists.size() + "]";
     }
 }

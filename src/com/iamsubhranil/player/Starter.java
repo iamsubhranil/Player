@@ -7,10 +7,13 @@
 */
 package com.iamsubhranil.player;
 
-import com.iamsubhranil.player.ui.ReUI;
+import com.iamsubhranil.player.db.Environment;
+import com.iamsubhranil.player.db.SearchScope;
+import com.iamsubhranil.player.ui.panes.FirstRun;
+import com.iamsubhranil.player.ui.panes.ReUI;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 //import radams.gracenote.webapi.GracenoteException;
@@ -30,17 +33,44 @@ public class Starter extends Application {
     @Override
     public void start(Stage primaryStage) {
         loadFonts();
-        VBox vBox = new VBox();
-        vBox.setFillWidth(true);
-        vBox.getStylesheets().add("/styles/MyMetro.css");
 
-        ReUI reUI = new ReUI();
-        reUI.getStylesheets().add("/styles/MyMetro.css");
+        Scene scene;
 
-        Scene primaryScene = new Scene(reUI, 700, 500);
+        SearchScope.loadSearchScopes();
+
+        if (!Environment.hasSongIndex()) {
+            System.out.println("No index");
+            FirstRun firstRun = new FirstRun();
+            firstRun.getStylesheets().add("/styles/MyMetro.css");
+            if (Environment.hasSearchScope()) {
+                System.out.println("Has search scope");
+                firstRun.prepareIndexUI();
+
+            } else {
+                System.out.println("No search scope");
+                firstRun.prepareSearchUI();
+            }
+            scene = new Scene(firstRun, 700, 500);
+
+            firstRun.setOnFinished(() -> {
+                Platform.runLater(() -> {
+                    ReUI reUI = new ReUI();
+                    reUI.getStylesheets().add("/styles/MyMetro.css");
+                    scene.setRoot(reUI);
+                });
+            });
+        } else {
+            System.out.println("Have index");
+            ReUI reUI = new ReUI();
+            reUI.getStylesheets().add("/styles/MyMetro.css");
+            scene = new Scene(reUI, 700, 500);
+        }
+
+
 
         //  primaryStage.initStyle(StageStyle.TRANSPARENT);
-        primaryStage.setScene(primaryScene);
+        primaryStage.setScene(scene);
+        //   primaryStage.setScene(new Scene(new SVGTest(),700,500));
         primaryStage.show();
     }
 

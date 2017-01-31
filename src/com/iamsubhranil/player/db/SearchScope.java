@@ -12,10 +12,10 @@ import java.util.ArrayList;
 
 public class SearchScope {
 
-    private static final File fileToStore = new File("search.scopes");
+    private static final File fileToStore = Environment.getSearchScopeFile();
     private static final ArrayList<File> scopes = new ArrayList<>();
 
-    static boolean loadSearchScopes() {
+    public static boolean loadSearchScopes() {
         scopes.clear();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileToStore));
@@ -43,6 +43,7 @@ public class SearchScope {
                 return false;
         }
         scopes.add(newScope);
+        ContentManager.getBackgroundService().execute(SearchScope::storeSearchScopes);
         return true;
     }
 

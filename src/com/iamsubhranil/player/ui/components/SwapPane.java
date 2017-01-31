@@ -5,9 +5,11 @@
     Package : com.iamsubhranil.player.ui
     Project : Player
 */
-package com.iamsubhranil.player.ui;
+package com.iamsubhranil.player.ui.components;
 
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -20,8 +22,8 @@ import java.util.ArrayList;
 public class SwapPane extends BorderPane {
 
     private final HBox buttonBox;
-    private final ArrayList<Pane> panes;
-    private Pane current = null;
+    private final ArrayList<VBox> panes;
+    private VBox current = null;
     private Button disabledButton = null;
 
     public SwapPane() {
@@ -36,6 +38,7 @@ public class SwapPane extends BorderPane {
         Button switchButton = new Button(title);
         switchButton.getStyleClass().add("button-noborder");
         VBox pane = new VBox();
+        pane.setPadding(new Insets(5, 5, 5, 5));
         switchButton.setOnAction(e -> {
             switchToPane(pane);
             if (disabledButton != null)
@@ -49,10 +52,11 @@ public class SwapPane extends BorderPane {
             setCenter(current);
             //  switchButton.fire();
         }
+        panes.add(pane);
         return pane;
     }
 
-    private void switchToPane(Pane p) {
+    private void switchToPane(VBox p) {
         if (current == null)
             return;
         int curIndex = panes.indexOf(current);
@@ -62,20 +66,14 @@ public class SwapPane extends BorderPane {
     }
 
     private void movePane(Pane from, Pane to, boolean fromRight) {
-        TranslateTransition enterTransition = new TranslateTransition(Duration.millis(100), to);
-        enterTransition.setToX(from.getLayoutX());
-        enterTransition.setToY(from.getLayoutY());
-        enterTransition.setInterpolator(Interpolator.EASE_IN);
-        enterTransition.setFromX(from.getLayoutX() + ((fromRight ? 1 : -1) * 50));
-        enterTransition.setFromY(from.getLayoutY());
-        FadeTransition fadeEnter = new FadeTransition(Duration.millis(150), to);
+        FadeTransition fadeEnter = new FadeTransition(Duration.millis(50), to);
         fadeEnter.setFromValue(0.0);
         fadeEnter.setToValue(1.0);
-        ParallelTransition paneEnter = new ParallelTransition(enterTransition, fadeEnter);
+        //  ParallelTransition paneEnter = new ParallelTransition(enterTransition, fadeEnter);
 
-        TranslateTransition exitTransition = new TranslateTransition(Duration.millis(100), from);
+     /*   TranslateTransition exitTransition = new TranslateTransition(Duration.millis(100), from);
         exitTransition.setFromX(from.getLayoutX());
-        exitTransition.setFromY(from.getLayoutY());
+        exitTransition.setFromY(from.getLayoutY()-10);
         exitTransition.setInterpolator(Interpolator.EASE_OUT);
         exitTransition.setToX(from.getLayoutX() - ((fromRight ? 1 : -1) * 50));
         exitTransition.setToY(from.getLayoutY());
@@ -83,12 +81,17 @@ public class SwapPane extends BorderPane {
             to.setOpacity(0.0);
             setCenter(to);
         });
+        */
         FadeTransition fadeExit = new FadeTransition(Duration.millis(50), from);
         fadeExit.setFromValue(1.0);
         fadeExit.setToValue(0.0);
-        ParallelTransition paneExit = new ParallelTransition(exitTransition, fadeExit);
+        fadeExit.setOnFinished(e -> {
+            to.setOpacity(0.0);
+            setCenter(to);
+        });
+        //  ParallelTransition paneExit = new ParallelTransition(exitTransition, fadeExit);
 
-        SequentialTransition swapAnimation = new SequentialTransition(paneExit, paneEnter);
+        SequentialTransition swapAnimation = new SequentialTransition(fadeExit, fadeEnter);
         swapAnimation.play();
 
     }

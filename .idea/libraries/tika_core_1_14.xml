@@ -4,6 +4,8 @@
       <root url="jar://$PROJECT_DIR$/../playerextras/tika-1.14/tika-core/target/tika-core-1.14.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ideaLibSources/tika-core-1.14-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

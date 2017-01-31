@@ -5,9 +5,9 @@
     Package : com.iamsubhranil.player
     Project : Player
 */
-package com.iamsubhranil.player.ui;
+package com.iamsubhranil.player.ui.panes;
 
-import com.iamsubhranil.player.core.ContentManager;
+import com.iamsubhranil.player.db.ContentManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.SequentialTransition;
@@ -16,7 +16,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -51,23 +50,20 @@ public class ReUI extends BorderPane {
         Label head = new Label("Player");
         head.getStyleClass().add("header");
         Label subtitle = new Label("Your music. Our emotion.");
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.setProgress(-1);
+        //   ProgressBar progressBar = new ProgressBar();
+        //  progressBar.setProgress(-1);
 
         startPage.setAlignment(Pos.CENTER);
         startPage.setSpacing(5);
-        startPage.getChildren().addAll(head, subtitle, progressBar);
+        startPage.getChildren().addAll(head, subtitle);
 
         FadeTransition labelFade = new FadeTransition(Duration.millis(100), subtitle);
         labelFade.setFromValue(1.0);
         labelFade.setToValue(0.0);
-        FadeTransition barFade = new FadeTransition(Duration.millis(100), progressBar);
-        barFade.setFromValue(1.0);
-        barFade.setToValue(0.0);
         FadeTransition transition = new FadeTransition(Duration.millis(100), head);
         transition.setFromValue(1.0);
         transition.setToValue(0.0);
-        ParallelTransition pt = new ParallelTransition(labelFade, barFade, transition);
+        ParallelTransition pt = new ParallelTransition(labelFade, transition);
         pt.setOnFinished(e -> {
             topBox.setOpacity(0.0);
             setTop(topBox);
