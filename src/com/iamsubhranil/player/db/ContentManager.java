@@ -141,60 +141,6 @@ public class ContentManager {
         System.out.println("Null artist found at " + index[0] + " size " + artistArrayList.size());
         artistArrayList.remove(index[0]);
     }
-
-    /*  public static void loadSongStore() throws IOException {
-          songIndexReader = Preparation.getSongIndex();
-          HashSet<String> albums = new HashSet<>();
-          HashSet<String> artists = new HashSet<>();
-          totalContent = songIndexReader.numDocs();
-          int totDocs = songIndexReader.numDocs();
-          final Document[] song = new Document[1];
-          while (totDocs > 0) {
-              Document song1 = songIndexReader.document(totDocs);
-              albums.add(song1.get("AlbumHash"));
-              artists.add(song1.get("ArtistHash"));
-              totDocs--;
-          }
-          System.out.println("Total albums : " + albums.size());
-          System.out.println("Total artists : " + artists.size());
-          albums.forEach(album -> {
-              if (album != null) {
-                  try {
-                      TopDocs songs = searchFor("AlbumHash", album, songIndexReader);
-                      Album album1 = new Album(songIndexReader.document(songs.scoreDocs[0].doc).get("Album"));
-                      for (ScoreDoc scoreDoc : songs.scoreDocs) {
-                          song[0] = songIndexReader.document(scoreDoc.doc);
-                          album1.addSong(song[0].get("SongHash"));
-                          album1.addArtist(song[0].get("ArtistHash"));
-                      }
-                      albumArrayList.add(album1);
-                  } catch (ParseException | IOException e) {
-                      e.printStackTrace();
-                  }
-              }
-          });
-          System.out.println("Sorted albums : " + albumArrayList.size());
-          artists.forEach(artist -> {
-              if (artist != null) {
-                  try {
-                      TopDocs songs = searchFor("ArtistHash", artist, songIndexReader);
-                      Artist artist1 = new Artist(songIndexReader.document(songs.scoreDocs[0].doc).get("Artist"), artist);
-                      for (ScoreDoc scoreDoc : songs.scoreDocs) {
-                          song[0] = songIndexReader.document(scoreDoc.doc);
-                          artist1.addSong(song[0].get("SongHash"));
-                          artist1.addAlbum(song[0].get("AlbumHash"));
-                      }
-                      artistArrayList.add(artist1);
-                  } catch (ParseException | IOException e) {
-                      e.printStackTrace();
-                  }
-              }
-          });
-          albums = null;
-          artists = null;
-          System.out.println("Sorted artists : " + artistArrayList.size());
-      }
-  */
     /* Method to retrieve and show artist images.
        This method will be user controllable in some future release.
        When called, this method first checks if there is at all any lucene index files present.
